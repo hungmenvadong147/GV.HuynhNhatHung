@@ -44,14 +44,22 @@ class DataStorageManager {
     }
 }
 
+// Admin Credentials (Tạm thời - nên chuyển sang backend sau)
+const ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: '123456'
+};
+
 // App Class
 class LearningWebsite {
     private isAdminMode: boolean = false;
+    private isLoggedIn: boolean = false;
     private data: AppData;
     private currentEditingCourse: string | null = null;
 
     constructor() {
         this.data = DataStorageManager.loadData();
+        this.checkLoginStatus();
         this.init();
     }
 
@@ -82,10 +90,33 @@ class LearningWebsite {
             });
         });
 
-        // Admin mode toggle
+        // Admin mode toggle - Show login modal
         const adminModeBtn = document.getElementById('adminModeBtn');
         adminModeBtn?.addEventListener('click', () => {
-            this.toggleAdminMode();
+            if (this.isLoggedIn) {
+                this.toggleAdminMode();
+            } else {
+                this.showLoginModal();
+            }
+        });
+
+        // Login form
+        const loginForm = document.getElementById('loginForm') as HTMLFormElement;
+        loginForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLogin();
+        });
+
+        // Cancel login button
+        const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+        cancelLoginBtn?.addEventListener('click', () => {
+            this.closeLoginModal();
+        });
+
+        // Close login modal
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        closeLoginModal?.addEventListener('click', () => {
+            this.closeLoginModal();
         });
 
         // Add course button
@@ -152,7 +183,112 @@ class LearningWebsite {
         this.setupVideoUploads();
     }
 
+    // Check login status from localStorage
+    private checkLoginStatus(): void {
+        const savedLogin = localStorage.getItem('adminLoggedIn');
+        if (savedLogin === 'true') {
+            this.isLoggedIn = true;
+        }
+    }
+
+    // Show login modal
+    private showLoginModal(): void {
+        const modal = document.getElementById('loginModal');
+        modal?.classList.add('active');
+        
+        // Clear previous error
+        const errorDiv = document.getElementById('loginError');
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+        }
+
+        // Clear form
+        const form = document.getElementById('loginForm') as HTMLFormElement;
+        form?.reset();
+
+        // Focus on username field
+        setTimeout(() => {
+            const usernameInput = document.getElementById('loginUsername') as HTMLInputElement;
+            usernameInput?.focus();
+        }, 100);
+    }
+
+    // Close login modal
+    private closeLoginModal(): void {
+        const modal = document.getElementById('loginModal');
+        modal?.classList.remove('active');
+    }
+
+    // Handle login
+    private handleLogin(): void {
+        const usernameInput = document.getElementById('loginUsername') as HTMLInputElement;
+        const passwordInput = document.getElementById('loginPassword') as HTMLInputElement;
+        const rememberMeInput = document.getElementById('rememberMe') as HTMLInputElement;
+        const errorDiv = document.getElementById('loginError');
+
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        const rememberMe = rememberMeInput.checked;
+
+        // Validate credentials
+        if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+            // Login successful
+            this.isLoggedIn = true;
+
+            // Save login status if remember me is checked
+            if (rememberMe) {
+                localStorage.setItem('adminLoggedIn', 'true');
+            }
+
+            // Close modal
+            this.closeLoginModal();
+
+            // Show success message
+            this.showNotification('Đăng nhập thành công!', 'success');
+
+            // Enable admin mode
+            this.toggleAdminMode();
+        } else {
+            // Login failed
+            if (errorDiv) {
+                errorDiv.textContent = '❌ Sai tài khoản hoặc mật khẩu!';
+                errorDiv.style.display = 'block';
+            }
+
+            // Shake animation for error
+            const modalContent = document.querySelector('#loginModal .modal-content');
+            modalContent?.classList.add('shake');
+            setTimeout(() => {
+                modalContent?.classList.remove('shake');
+            }, 500);
+
+            // Clear password field
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
+
+    // Logout
+    private logout(): void {
+        this.isLoggedIn = false;
+        localStorage.removeItem('adminLoggedIn');
+        
+        // Disable admin mode if active
+        if (this.isAdminMode) {
+            this.toggleAdminMode();
+        }
+
+        this.showNotification('Đã đăng xuất', 'info');
+    }
+
     private toggleAdminMode(): void {
+        // Check if logged in
+        if (!this.isLoggedIn && !this.isAdminMode) {
+            this.showLoginModal();
+            return;
+        }
+
         this.isAdminMode = !this.isAdminMode;
         const body = document.body;
         const adminBtn = document.getElementById('adminModeBtn');
@@ -168,6 +304,27 @@ class LearningWebsite {
             if (adminBtn) adminBtn.textContent = 'Chế độ quản trị';
             this.disableEditing();
         }
+    }
+
+    // Show notification
+    private showNotification(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+
+        // Hide and remove notification
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
     }
 
     private setupEditableContent(): void {

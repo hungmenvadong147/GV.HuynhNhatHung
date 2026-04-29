@@ -142,6 +142,36 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content login-modal-content">
+            <span class="close" id="closeLoginModal">&times;</span>
+            <h2>Đăng nhập Quản trị</h2>
+            <p class="login-subtitle">Vui lòng đăng nhập để truy cập chế độ quản trị</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Tài khoản:</label>
+                    <input type="text" id="loginUsername" placeholder="Nhập tài khoản" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>Mật khẩu:</label>
+                    <input type="password" id="loginPassword" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                </div>
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="rememberMe">
+                        <span>Lưu đăng nhập</span>
+                    </label>
+                </div>
+                <div class="login-error" id="loginError" style="display: none;"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary btn-login">Đăng nhập</button>
+                    <button type="button" class="btn-secondary" id="cancelLoginBtn">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="dist/app.js"></script>
 </body>
 </html>

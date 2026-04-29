@@ -26,23 +26,38 @@ export class CloudinaryService {
         formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
         formData.append('cloud_name', CLOUDINARY_CONFIG.cloudName);
 
+        // Log để debug
+        console.log('🚀 Uploading to Cloudinary:', {
+            cloudName: CLOUDINARY_CONFIG.cloudName,
+            uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
+            resourceType,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type
+        });
+
         try {
-            const response = await fetch(
-                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${resourceType}/upload`,
-                {
-                    method: 'POST',
-                    body: formData
-                }
-            );
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${resourceType}/upload`;
+            console.log('📡 Upload URL:', uploadUrl);
+
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            console.log('📥 Response status:', response.status);
 
             if (!response.ok) {
-                throw new Error(`Upload failed: ${response.statusText}`);
+                const errorData = await response.json();
+                console.error('❌ Cloudinary error:', errorData);
+                throw new Error(`Upload failed: ${errorData.error?.message || response.statusText}`);
             }
 
             const data = await response.json();
+            console.log('✅ Upload successful:', data);
             return data;
         } catch (error) {
-            console.error('Cloudinary upload error:', error);
+            console.error('💥 Cloudinary upload error:', error);
             throw error;
         }
     }

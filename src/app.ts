@@ -405,11 +405,28 @@ class LearningWebsite {
 
     private async handleVideoUpload(file: File, key: string, container: HTMLElement): Promise<void> {
         try {
+            // Validate file type
+            if (!file.type.startsWith('video/')) {
+                alert('Vui lòng chọn file video!');
+                return;
+            }
+
+            // Validate file size
+            const maxSize = 100 * 1024 * 1024; // 100MB
+            if (file.size > maxSize) {
+                alert('Video quá lớn! Vui lòng chọn video nhỏ hơn 100MB.');
+                return;
+            }
+
             // Show loading indicator
-            this.showLoading(container, 'Đang tải video lên Cloudinary...');
+            this.showLoading(container, 'Đang tải video lên Cloudinary... (có thể mất vài phút)');
+
+            console.log('📤 Starting video upload:', file.name);
 
             // Upload to Cloudinary
             const result = await CloudinaryService.uploadFile(file, 'video');
+
+            console.log('✅ Video uploaded successfully:', result.secure_url);
 
             // Save URL and public ID
             this.data.videos[key] = {
@@ -421,10 +438,28 @@ class LearningWebsite {
             // Display video
             this.displayVideo(result.secure_url, container);
             this.hideLoading(container);
+
+            this.showNotification('Tải video lên thành công!', 'success');
         } catch (error) {
-            console.error('Video upload error:', error);
-            alert('Lỗi khi tải video lên. Vui lòng thử lại.');
+            console.error('💥 Video upload error:', error);
             this.hideLoading(container);
+            
+            // Show detailed error message
+            let errorMessage = 'Lỗi khi tải video lên.';
+            if (error instanceof Error) {
+                errorMessage += '\n\n' + error.message;
+                
+                // Check for common errors
+                if (error.message.includes('preset')) {
+                    errorMessage += '\n\n⚠️ Bạn cần tạo Upload Preset trong Cloudinary:\n';
+                    errorMessage += '1. Vào: console.cloudinary.com/settings/upload\n';
+                    errorMessage += '2. Tạo preset tên: learning-website\n';
+                    errorMessage += '3. Chọn Signing Mode: Unsigned';
+                }
+            }
+            
+            alert(errorMessage);
+            this.showNotification('Upload thất bại! Xem Console (F12) để biết chi tiết.', 'error');
         }
     }
 
@@ -555,15 +590,34 @@ class LearningWebsite {
                     course.description = description;
 
                     if (videoFile) {
+                        // Validate file type
+                        if (!videoFile.type.startsWith('video/')) {
+                            alert('Vui lòng chọn file video!');
+                            return;
+                        }
+
+                        // Validate file size (max 100MB for video)
+                        const maxSize = 100 * 1024 * 1024; // 100MB
+                        if (videoFile.size > maxSize) {
+                            alert('Video quá lớn! Vui lòng chọn video nhỏ hơn 100MB.');
+                            return;
+                        }
+
                         // Show loading
-                        this.showModalLoading('Đang tải video lên Cloudinary...');
+                        this.showModalLoading('Đang tải video lên Cloudinary... (có thể mất vài phút)');
+
+                        console.log('📤 Starting video upload:', videoFile.name);
 
                         // Upload to Cloudinary
                         const result = await CloudinaryService.uploadFile(videoFile, 'video');
+                        
+                        console.log('✅ Video uploaded successfully:', result.secure_url);
+                        
                         course.videoUrl = result.secure_url;
                         course.videoPublicId = result.public_id;
 
                         this.hideModalLoading();
+                        this.showNotification('Tải video lên thành công!', 'success');
                     }
 
                     DataStorageManager.saveData(this.data);
@@ -579,15 +633,34 @@ class LearningWebsite {
                 };
 
                 if (videoFile) {
+                    // Validate file type
+                    if (!videoFile.type.startsWith('video/')) {
+                        alert('Vui lòng chọn file video!');
+                        return;
+                    }
+
+                    // Validate file size
+                    const maxSize = 100 * 1024 * 1024; // 100MB
+                    if (videoFile.size > maxSize) {
+                        alert('Video quá lớn! Vui lòng chọn video nhỏ hơn 100MB.');
+                        return;
+                    }
+
                     // Show loading
-                    this.showModalLoading('Đang tải video lên Cloudinary...');
+                    this.showModalLoading('Đang tải video lên Cloudinary... (có thể mất vài phút)');
+
+                    console.log('📤 Starting video upload:', videoFile.name);
 
                     // Upload to Cloudinary
                     const result = await CloudinaryService.uploadFile(videoFile, 'video');
+                    
+                    console.log('✅ Video uploaded successfully:', result.secure_url);
+                    
                     newCourse.videoUrl = result.secure_url;
                     newCourse.videoPublicId = result.public_id;
 
                     this.hideModalLoading();
+                    this.showNotification('Tải video lên thành công!', 'success');
                 }
 
                 this.data.courses.push(newCourse);
@@ -596,9 +669,25 @@ class LearningWebsite {
                 this.closeCourseModal();
             }
         } catch (error) {
-            console.error('Save course error:', error);
-            alert('Lỗi khi lưu khóa học. Vui lòng thử lại.');
+            console.error('💥 Save course error:', error);
             this.hideModalLoading();
+            
+            // Show detailed error message
+            let errorMessage = 'Lỗi khi lưu khóa học.';
+            if (error instanceof Error) {
+                errorMessage += '\n\n' + error.message;
+                
+                // Check for common errors
+                if (error.message.includes('preset')) {
+                    errorMessage += '\n\n⚠️ Bạn cần tạo Upload Preset trong Cloudinary:\n';
+                    errorMessage += '1. Vào: console.cloudinary.com/settings/upload\n';
+                    errorMessage += '2. Tạo preset tên: learning-website\n';
+                    errorMessage += '3. Chọn Signing Mode: Unsigned';
+                }
+            }
+            
+            alert(errorMessage);
+            this.showNotification('Upload thất bại! Xem Console (F12) để biết chi tiết.', 'error');
         }
     }
 
@@ -681,11 +770,28 @@ class LearningWebsite {
 
         if (file) {
             try {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn file hình ảnh!');
+                    return;
+                }
+
+                // Validate file size (max 10MB for free tier)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    alert('File quá lớn! Vui lòng chọn file nhỏ hơn 10MB.');
+                    return;
+                }
+
                 // Show loading
                 this.showModalLoading('Đang tải hình ảnh lên Cloudinary...');
 
+                console.log('📤 Starting image upload:', file.name);
+
                 // Upload to Cloudinary
                 const result = await CloudinaryService.uploadFile(file, 'image');
+
+                console.log('✅ Image uploaded successfully:', result.secure_url);
 
                 const newImage: GalleryImage = {
                     id: this.generateId(),
@@ -698,10 +804,28 @@ class LearningWebsite {
                 this.renderGallery();
                 this.closeGalleryModal();
                 this.hideModalLoading();
+
+                this.showNotification('Tải hình ảnh lên thành công!', 'success');
             } catch (error) {
-                console.error('Gallery upload error:', error);
-                alert('Lỗi khi tải hình ảnh lên. Vui lòng thử lại.');
+                console.error('💥 Gallery upload error:', error);
                 this.hideModalLoading();
+                
+                // Show detailed error message
+                let errorMessage = 'Lỗi khi tải hình ảnh lên.';
+                if (error instanceof Error) {
+                    errorMessage += '\n\n' + error.message;
+                    
+                    // Check for common errors
+                    if (error.message.includes('preset')) {
+                        errorMessage += '\n\n⚠️ Bạn cần tạo Upload Preset trong Cloudinary:\n';
+                        errorMessage += '1. Vào: console.cloudinary.com/settings/upload\n';
+                        errorMessage += '2. Tạo preset tên: learning-website\n';
+                        errorMessage += '3. Chọn Signing Mode: Unsigned';
+                    }
+                }
+                
+                alert(errorMessage);
+                this.showNotification('Upload thất bại! Xem Console (F12) để biết chi tiết.', 'error');
             }
         }
     }

@@ -711,6 +711,9 @@ class LearningWebsite {
         const galleryGrid = document.getElementById('galleryGrid');
         if (!galleryGrid) return;
 
+        console.log('🎨 Rendering gallery with', this.data.gallery.length, 'images');
+        console.log('📸 Gallery data:', this.data.gallery);
+
         galleryGrid.innerHTML = '';
 
         this.data.gallery.forEach(image => {
@@ -739,8 +742,14 @@ class LearningWebsite {
         // Use optimized image URL
         const optimizedUrl = CloudinaryService.getOptimizedImageUrl(image.url, 400, 85);
 
+        console.log('🖼️ Creating gallery item:', {
+            originalUrl: image.url,
+            optimizedUrl: optimizedUrl,
+            imageId: image.id
+        });
+
         item.innerHTML = `
-            <img src="${optimizedUrl}" alt="Gallery Image" loading="lazy">
+            <img src="${optimizedUrl}" alt="Gallery Image" loading="lazy" onerror="console.error('❌ Failed to load image:', this.src)">
             <button class="gallery-item-delete admin-only" data-id="${image.id}">×</button>
         `;
 
@@ -791,7 +800,8 @@ class LearningWebsite {
                 // Upload to Cloudinary
                 const result = await CloudinaryService.uploadFile(file, 'image');
 
-                console.log('✅ Image uploaded successfully:', result.secure_url);
+                console.log('✅ Image uploaded successfully:', result);
+                console.log('🔗 Image URL:', result.secure_url);
 
                 const newImage: GalleryImage = {
                     id: this.generateId(),
@@ -799,9 +809,17 @@ class LearningWebsite {
                     publicId: result.public_id
                 };
 
+                console.log('💾 Saving new image to gallery:', newImage);
+
                 this.data.gallery.push(newImage);
+                
+                console.log('📊 Current gallery data:', this.data.gallery);
+                
                 DataStorageManager.saveData(this.data);
+                
+                console.log('🔄 Rendering gallery...');
                 this.renderGallery();
+                
                 this.closeGalleryModal();
                 this.hideModalLoading();
 

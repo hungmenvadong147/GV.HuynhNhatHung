@@ -748,15 +748,39 @@ class LearningWebsite {
             imageId: image.id
         });
 
-        item.innerHTML = `
-            <img src="${optimizedUrl}" alt="Gallery Image" loading="lazy" onerror="console.error('❌ Failed to load image:', this.src)">
-            <button class="gallery-item-delete admin-only" data-id="${image.id}">×</button>
-        `;
+        // Create img element
+        const img = document.createElement('img');
+        img.src = optimizedUrl;
+        img.alt = 'Gallery Image';
+        img.loading = 'lazy';
+        
+        // Add loaded class when image loads
+        img.onload = () => {
+            img.classList.add('loaded');
+            console.log('✅ Image loaded successfully:', optimizedUrl);
+        };
+        
+        img.onerror = () => {
+            console.error('❌ Failed to load image:', optimizedUrl);
+            // Show placeholder on error
+            img.style.display = 'none';
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; background: #f8d7da; color: #721c24; padding: 20px; text-align: center;';
+            errorDiv.textContent = 'Không thể tải ảnh';
+            item.appendChild(errorDiv);
+        };
 
-        const deleteBtn = item.querySelector('.gallery-item-delete');
-        deleteBtn?.addEventListener('click', () => {
+        // Create delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'gallery-item-delete admin-only';
+        deleteBtn.setAttribute('data-id', image.id);
+        deleteBtn.textContent = '×';
+        deleteBtn.addEventListener('click', () => {
             this.deleteGalleryImage(image.id);
         });
+
+        item.appendChild(img);
+        item.appendChild(deleteBtn);
 
         return item;
     }

@@ -2,9 +2,8 @@
 // Copy this file to config.ts and fill in your actual values
 
 export const CLOUDINARY_CONFIG = {
-    cloudName: 'dvlfaq9ma',
-    apiKey: 'YOUR_API_KEY_HERE', // Get from Cloudinary dashboard
-    uploadPreset: 'learning-website' // Create this in Cloudinary settings
+    cloudName: 'your-cloud-name', // Thay bằng cloud name của bạn
+    uploadPreset: 'your-upload-preset' // Tạo unsigned preset trong Cloudinary Dashboard
 };
 
 export const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/upload`;

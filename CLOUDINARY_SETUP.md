@@ -13,21 +13,18 @@
    - **Access Mode**: **Public**
 6. Click **Save**
 
-## Bước 2: Cấu hình API Keys
+## Bước 2: Kiểm tra cấu hình
 
-1. Copy file `src/config.example.ts` thành `src/config.ts`:
-   ```bash
-   cp src/config.example.ts src/config.ts
-   ```
+Mở file `src/config.ts` và đảm bảo có đúng thông tin:
 
-2. Mở file `src/config.ts` và điền thông tin:
-   ```typescript
-   export const CLOUDINARY_CONFIG = {
-       cloudName: 'dvlfaq9ma',
-       apiKey: '688857149531381', // Hoặc key khác từ dashboard
-       uploadPreset: 'learning-website' // Tên preset vừa tạo
-   };
-   ```
+```typescript
+export const CLOUDINARY_CONFIG = {
+    cloudName: 'dvlfaq9ma',
+    uploadPreset: 'learning-website' // Tên preset vừa tạo ở bước 1
+};
+```
+
+**Lưu ý**: Không cần API Key hay API Secret cho unsigned uploads!
 
 ## Bước 3: Build và chạy
 
@@ -37,12 +34,12 @@ npm run build
 
 Sau đó mở `index.html` trong trình duyệt.
 
-## Lưu ý bảo mật
+## Lưu ý quan trọng
 
-- **KHÔNG** commit file `src/config.ts` lên Git
-- File này đã được thêm vào `.gitignore`
-- Chỉ sử dụng **Unsigned Upload Preset** cho client-side upload
-- API Secret không cần thiết cho unsigned uploads
+- ✅ **Unsigned uploads** không cần API Key hay API Secret
+- ✅ Chỉ cần `cloudName` và `uploadPreset`
+- ✅ Upload trực tiếp từ browser, an toàn và đơn giản
+- ⚠️ Đảm bảo preset có **Signing Mode = Unsigned**
 
 ## Kiểm tra
 

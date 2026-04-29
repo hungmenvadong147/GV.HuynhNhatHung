@@ -24,7 +24,8 @@ export class CloudinaryService {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-        formData.append('cloud_name', CLOUDINARY_CONFIG.cloudName);
+        // ⚠️ KHÔNG GỬI cloud_name trong FormData cho unsigned upload!
+        // Cloud name chỉ dùng trong URL
 
         // Log để debug
         console.log('🚀 Uploading to Cloudinary:', {
@@ -32,7 +33,7 @@ export class CloudinaryService {
             uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
             resourceType,
             fileName: file.name,
-            fileSize: file.size,
+            fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
             fileType: file.type
         });
 
@@ -49,15 +50,53 @@ export class CloudinaryService {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('❌ Cloudinary error:', errorData);
-                throw new Error(`Upload failed: ${errorData.error?.message || response.statusText}`);
+                console.error('❌ Cloudinary error response:', errorData);
+                
+                // Xử lý các loại lỗi cụ thể
+                let errorMessage = 'Upload thất bại';
+                
+                if (errorData.error?.message) {
+                    const msg = errorData.error.message;
+                    
+                    if (msg.includes('preset') && msg.includes('whitelisted')) {
+                        errorMessage = `❌ Lỗi Upload Preset!\n\n` +
+                            `Preset "${CLOUDINARY_CONFIG.uploadPreset}" chưa được cấu hình đúng.\n\n` +
+                            `Hướng dẫn sửa:\n` +
+                            `1. Vào: https://console.cloudinary.com/settings/upload\n` +
+                            `2. Tìm preset tên: "${CLOUDINARY_CONFIG.uploadPreset}"\n` +
+                            `3. Đảm bảo:\n` +
+                            `   - Signing Mode = "Unsigned"\n` +
+                            `   - Status = "Enabled"\n` +
+                            `4. Nếu chưa có preset, tạo mới với tên chính xác: "${CLOUDINARY_CONFIG.uploadPreset}"\n` +
+                            `5. Lưu lại và thử upload lại`;
+                    } else if (msg.includes('Invalid')) {
+                        errorMessage = `❌ Lỗi: ${msg}\n\nKiểm tra lại Cloud Name trong src/config.ts`;
+                    } else if (msg.includes('File size')) {
+                        errorMessage = `❌ File quá lớn!\n\n${msg}`;
+                    } else {
+                        errorMessage = `❌ Lỗi Cloudinary: ${msg}`;
+                    }
+                }
+                
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
-            console.log('✅ Upload successful:', data);
+            console.log('✅ Upload successful:', {
+                url: data.secure_url,
+                publicId: data.public_id,
+                format: data.format,
+                size: data.bytes ? `${(data.bytes / 1024 / 1024).toFixed(2)} MB` : 'N/A'
+            });
             return data;
         } catch (error) {
             console.error('💥 Cloudinary upload error:', error);
+            
+            // Nếu là lỗi network
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+                throw new Error('❌ Lỗi kết nối!\n\nKiểm tra kết nối internet của bạn.');
+            }
+            
             throw error;
         }
     }

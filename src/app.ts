@@ -447,19 +447,12 @@ class LearningWebsite {
             // Show detailed error message
             let errorMessage = 'Lỗi khi tải video lên.';
             if (error instanceof Error) {
-                errorMessage += '\n\n' + error.message;
-                
-                // Check for common errors
-                if (error.message.includes('preset')) {
-                    errorMessage += '\n\n⚠️ Bạn cần tạo Upload Preset trong Cloudinary:\n';
-                    errorMessage += '1. Vào: console.cloudinary.com/settings/upload\n';
-                    errorMessage += '2. Tạo preset tên: learning-website\n';
-                    errorMessage += '3. Chọn Signing Mode: Unsigned';
-                }
+                // Cloudinary service đã trả về error message chi tiết
+                errorMessage = error.message;
             }
             
             alert(errorMessage);
-            this.showNotification('Upload thất bại! Xem Console (F12) để biết chi tiết.', 'error');
+            this.showNotification('Upload thất bại! Xem thông báo để biết chi tiết.', 'error');
         }
     }
 
@@ -675,19 +668,12 @@ class LearningWebsite {
             // Show detailed error message
             let errorMessage = 'Lỗi khi lưu khóa học.';
             if (error instanceof Error) {
-                errorMessage += '\n\n' + error.message;
-                
-                // Check for common errors
-                if (error.message.includes('preset')) {
-                    errorMessage += '\n\n⚠️ Bạn cần tạo Upload Preset trong Cloudinary:\n';
-                    errorMessage += '1. Vào: console.cloudinary.com/settings/upload\n';
-                    errorMessage += '2. Tạo preset tên: learning-website\n';
-                    errorMessage += '3. Chọn Signing Mode: Unsigned';
-                }
+                // Cloudinary service đã trả về error message chi tiết
+                errorMessage = error.message;
             }
             
             alert(errorMessage);
-            this.showNotification('Upload thất bại! Xem Console (F12) để biết chi tiết.', 'error');
+            this.showNotification('Upload thất bại! Xem thông báo để biết chi tiết.', 'error');
         }
     }
 
@@ -855,19 +841,15 @@ class LearningWebsite {
                 // Show detailed error message
                 let errorMessage = 'Lỗi khi tải hình ảnh lên.';
                 if (error instanceof Error) {
-                    errorMessage += '\n\n' + error.message;
-                    
-                    // Check for common errors
-                    if (error.message.includes('preset')) {
-                        errorMessage += '\n\n⚠️ Bạn cần tạo Upload Preset trong Cloudinary:\n';
-                        errorMessage += '1. Vào: console.cloudinary.com/settings/upload\n';
-                        errorMessage += '2. Tạo preset tên: learning-website\n';
-                        errorMessage += '3. Chọn Signing Mode: Unsigned';
-                    }
+                    // Cloudinary service đã trả về error message chi tiết
+                    errorMessage = error.message;
                 }
                 
+                // Hiển thị alert với thông báo lỗi
                 alert(errorMessage);
-                this.showNotification('Upload thất bại! Xem Console (F12) để biết chi tiết.', 'error');
+                
+                // Hiển thị notification
+                this.showNotification('Upload thất bại! Xem thông báo để biết chi tiết.', 'error');
             }
         }
     }

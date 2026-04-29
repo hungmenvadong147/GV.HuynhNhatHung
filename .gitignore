@@ -3,5 +3,10 @@ dist/
 *.log
 .DS_Store
 
-# Keep config template but ignore actual config with keys
-src/config.ts
+# Vercel
+.vercel
+
+# Environment variables (nếu có file .env)
+.env
+.env.local
+.env.production
